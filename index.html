@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Changes in Progress</title>
+    <style>
+        :root {
+            --tbackground: #1a1a1a;
+            --tcursor: #8EFF9F;
+            --tgreen: rgba(142, 255, 159, 0.7);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: var(--tbackground);
+            color: white;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #matrix-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        
+        .message-container {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 2rem;
+            border-radius: 8px;
+            border: 2px solid #3B3B3B;
+            text-align: center;
+            max-width: 600px;
+            width: 90%;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        .window-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #3B3B3B;
+            margin-bottom: 1.5rem;
+        }
+        
+        .window-buttons {
+            display: flex;
+        }
+        
+        .window-button {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #ff5f56;
+            margin-right: 8px;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+        }
+        
+        .window-button:nth-child(2) {
+            background-color: #ffbd2e;
+        }
+        
+        .window-button:nth-child(3) {
+            background-color: #27c93f;
+        }
+        
+        .window-title {
+            color: #ddd;
+            font-size: 14px;
+            flex-grow: 1;
+            text-align: center;
+        }
+        
+        h1 {
+            color: var(--tcursor);
+            font-size: 28px;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 0 10px rgba(142, 255, 159, 0.5);
+            position: relative;
+            display: inline-block;
+        }
+        
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background-color: var(--tcursor);
+            box-shadow: 0 0 10px rgba(142, 255, 159, 0.8);
+        }
+        
+        p {
+            color: #ddd;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        
+        .blinking-cursor {
+            display: inline-block;
+            width: 10px;
+            height: 20px;
+            background-color: var(--tcursor);
+            animation: blink 1s infinite;
+            vertical-align: middle;
+            margin-left: 5px;
+        }
+        
+        .terminal-line {
+            color: #ddd;
+            margin-bottom: 1rem;
+            text-align: left;
+            font-size: 14px;
+        }
+        
+        .command-line {
+            color: var(--tcursor);
+            text-align: left;
+        }
+        
+
+        
+        .back-button {
+            margin-top: 1.5rem;
+            padding: 0.5rem 1rem;
+            background-color: transparent;
+            color: var(--tcursor);
+            border: 1px solid var(--tcursor);
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        
+        .back-button:hover {
+            background-color: rgba(142, 255, 159, 0.1);
+            box-shadow: 0 0 10px rgba(142, 255, 159, 0.3);
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+
+        
+        @media (max-width: 768px) {
+            .message-container {
+                width: 95%;
+                padding: 1.5rem;
+            }
+            
+            h1 {
+                font-size: 22px;
+            }
+            
+            p {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrix-canvas"></canvas>
+    
+    <div class="message-container">
+        <div class="window-header">
+            <div class="window-buttons">
+                <span class="window-button"></span>
+                <span class="window-button"></span>
+                <span class="window-button"></span>
+            </div>
+            <div class="window-title">kaustuv@portfolio ~ maintenance</div>
+        </div>
+        
+        <h1>System Maintenance in Progress</h1>
+        
+        <div class="terminal-line command-line">$ ./update_system.sh</div>        
+        <p>Changes are currently being made to improve your experience.</p>
+        <p>Updates are under way. Please check back in a moment.</p>
+    </div>
+    
+    <script>
+        // Matrix Rain Animation
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Make canvas full screen
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Characters to be displayed
+        const characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz@#$%^&*()_+-=[]{}|;:,./<>?';
+        const charArray = characters.split('');
+
+        const fontSize = 14;
+        const columns = canvas.width / fontSize;
+
+        // Array of drops - one per column
+        const drops = [];
+
+        // Initialize drops
+        for (let i = 0; i < columns; i++) {
+            drops[i] = Math.floor(Math.random() * -100); // Initial position above the screen
+        }
+
+        // Drawing the matrix rain
+        function drawMatrixRain() {
+            // Black semi-transparent background to create fade effect
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Set text color and font
+            ctx.fillStyle = '#8EFF9F'; // Green text
+            ctx.font = `${fontSize}px "JetBrains Mono", monospace`;
+
+            // Drawing the characters
+            for (let i = 0; i < drops.length; i++) {
+                // Random character
+                const text = charArray[Math.floor(Math.random() * charArray.length)];
+                
+                // x coordinate for the drop
+                const x = i * fontSize;
+                
+                // y coordinate for the drop
+                const y = drops[i] * fontSize;
+                
+                // Draw the character
+                ctx.fillText(text, x, y);
+                
+                // Send the drop back to the top randomly with slower rate
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.985) {
+                    drops[i] = 0;
+                }
+                
+                // Move the drop down more slowly
+                drops[i] += 0.7; // Reduced from 1 to 0.7 for slower movement
+            }
+        }
+
+        // Update canvas size on resize
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            // Reset drops
+            drops.length = 0;
+            const columns = canvas.width / fontSize;
+            for (let i = 0; i < columns; i++) {
+                drops[i] = Math.floor(Math.random() * -100);
+            }
+        });
+
+        // Animation loop with slower frame rate
+        function animate() {
+            drawMatrixRain();
+            setTimeout(() => {
+                requestAnimationFrame(animate);
+            }, 40); // Adding a 40ms delay to slow down the animation
+        }
+
+        // Start the animation
+        animate();
+    </script>
+</body>
+</html>
